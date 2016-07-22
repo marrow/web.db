@@ -89,6 +89,10 @@ setup(
 		],
 	
 	entry_points = {
+		# ### WebCore Extensions
+		'web.db': [  # Database Connector
+				'sqlalchemy = web.db.sqlalchemy:SQLAlchemyDBConnection',
+			],
 		},
 	
 	install_requires = [
