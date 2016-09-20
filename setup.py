@@ -100,6 +100,7 @@ setup(
 		'web.db': [  # Database Connectors
 				'sqlalchemy = web.db.sa:SQLAlchemyDBConnection',
 				'mongoengine = web.db.me:MongoEngineDBConnection',
+				'sqlite3 = web.db.dbapi:SQLite3Connection',
 			],
 		},
 	
