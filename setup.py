@@ -98,7 +98,8 @@ setup(
 			],
 		
 		'web.db': [  # Database Connectors
-				'sqlalchemy = web.db.sqlalchemy:SQLAlchemyDBConnection',
+				'sqlalchemy = web.db.sa:SQLAlchemyDBConnection',
+				'mongoengine = web.db.me:MongoEngineDBConnection',
 			],
 		},
 	

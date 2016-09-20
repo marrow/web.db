@@ -13,5 +13,5 @@ version = ".".join([str(i) for i in version_info[:3]]) + ((version_info.releasel
 
 author = namedtuple('Author', ['name', 'email'])("Alice Bevan-McGregor", 'alice@gothcandy.com')
 description = "General database adapter layer for common configuration and operation."
-copyright = "2009-2015, Alice Bevan-McGregor and contributors"
-url = 'https://docs.webcore.io/db'
+copyright = "2009-2016, Alice Bevan-McGregor and contributors"
+url = 'https://github.com/marrow/web.db'
