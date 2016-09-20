@@ -7,7 +7,7 @@ from functools import partial
 from ..core.context import ContextGroup
 
 
-class DBExtension(object):
+class DatabaseExtension(object):
 	__slots__ = ('engines', 'uses', 'needs', 'provides')
 	
 	_provides = {'db'}
@@ -49,4 +49,12 @@ class DBExtension(object):
 			raise AttributeError()
 		
 		return partial(self._handle_event, name)
+
+
+class DBExtension(DatabaseExtension):
+	def __init__(self, *args, **kw):
+		super(DBExtension, self).__init__(*args, **kw)
+		
+		from warnings import warn
+		warn('DBExtension is deprecated, use DatabaseExtension instead.', DeprecationWarning)
 
