@@ -5,6 +5,7 @@ try:
 except ImportError:
 	raise ImportError('Unable to import sqlalchemy; pip install sqlalchemy to fix this.')
 
+
 log = __import__('logging').getLogger(__name__)
 
 
@@ -14,28 +15,31 @@ class SQLAlchemyDBConnection(object):
 	Creates a connection at startup then adds a sqlalchemy session to the WebCore context on each request, for seamless
 	ORM and relational DB support.
 	"""
-	def __init__(self, uri, session=None, metadata=None, session_opts={}, alias=None, **kw):
+	
+	__slots__ = ('uri', 'engine', 'config', 'alias', 'metadata', 'session', 'session_opts')
+	
+	def __init__(self, uri, session=None, metadata=None, session_opts=None, alias=None, **kw):
 		if session is not None and not isinstance(session, orm.scoping.ScopedSession):
 			raise TypeError('The "session" option needs to be a reference to a ScopedSession instance')
+		
 		if metadata is not None and not isinstance(metadata, MetaData):
 			raise TypeError('The "metadata" option needs to be a reference to a MetaData instance')
-		if not isinstance(session_opts, dict):
-			raise TypeError('The "session_opts" option needs to be a dictionary')
 		
 		self.uri = uri
-		self._engine = create_engine(uri, **kw)
-		self._config = kw
-		self._alias = alias
-		self._metadata = metadata
-		self._session = session
-		self._session_opts = session_opts
+		self.engine = create_engine(uri, **kw)
+		self.config = kw
+		self.alias = alias
+		self.metadata = metadata
+		self.session = session
+		self.session_opts = session_opts or {}
 	
 	def start(self, context):
 		"""Setup database connection and Session base class"""
 		
 		name = self.name = self._alias or self.__name__
 		
-		log.info("Connecting SQLAlchemy engine.", extra=dict(config=self._config,))
+		# TODO: More diagnostic information.
+		log.info("Connecting SQLAlchemy engine.", extra=dict(name=name, config=self._config))
 		self._engine.connect().close()
 		
 		if self._session is None:
@@ -56,18 +60,19 @@ class SQLAlchemyDBConnection(object):
 		
 		context.db[self.name] = self._session()
 	
-	def done(self, context, exc=None):
-		"""Commit the session transaction for the request"""
+	def done(self, context):
+		"""Commit the session transaction for the request."""
 		
-		# TODO: I don't believe exc is an actual value that WebCore gives us...
+		# TODO: TransactionExtension support.
+		
 		try:
 			if context.db[self.name].is_active:
-				if exc is None or isinstance(exc, HTTPException):
+				if context.response.status_int < 500:
 					context.db[self.name].commit()
 				else:
 					context.db[self.name].rollback()
 		finally:
-			context.db[self.name].close()
+			context.db[self.name].close()  # Not sure about this. -- Alice
 	
 	def stop(self, context):
 		self._engine.dispose()
