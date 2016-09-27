@@ -13,22 +13,24 @@ _safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
 class _DBAPIConnection(object):
 	"""WebCore DBExtension interface for projects utilizing DB-API database engines."""
 	
+	__slots__ = ('uri', 'safe', 'protect', 'alias', 'config')
+	
 	api = None  # Must be defined in subclasses.
 	uri_safety = True  # Go to some effort to hide connection passwords from logs.
 	thread_safe = True  # When False, create a connection for the duration of the request only.
 	
-	def __init__(self, uri, alias=None, **kw):
+	def __init__(self, engine, uri, safe=True, protect=True, alias=None, **kw):
 		"""Prepare configuration options."""
 		
 		self.uri = uri
-		self._alias = alias
-		self._config = kw
-		self._connector = load(self.api, 'db_api_connect')
+		self.safe = safe  # Thread safe? When False, create a connection for the duration of a request only.
+		self.protect = protect
+		self.alias = alias
+		self.config = kw
 		
-		if __debug__ and not self.api:
-			raise NotImplementedError("Use subclasses of _DBAPIConnection, not the class itself.")
+		self._connector = load(engine, 'db_api_connect')
 		
-		if self.thread_safe:
+		if self.safe:
 			self.start = self._connect
 			self.stop = self._disconnect
 		else:
@@ -41,10 +43,11 @@ class _DBAPIConnection(object):
 		# Only after passing to the DatabaseExtension intializer do we have a __name__...
 		name = self.name = self._alias or self.__name__
 		
-		if self.thread_safe or __debug__:
+		if __debug__:
+			luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
 			log.info("Connecting " + self.api.partition(':')[0] + " database layer.", extra=dict(
-					uri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if self.uri_safety else self.uri,
-					config = self._config,
+					uri = luri,
+					config = self.config,
 					name = name,
 				))
 		
@@ -58,7 +61,6 @@ class _DBAPIConnection(object):
 
 
 class SQLite3Connection(_DBAPIConnection):
-	api = 'sqlite3:connect'
-	uri_safety = False
-	thread_safe = False
+	def __init__(self, uri, alias=None, **kw):
+		super(SQLite3Connection, self).__init__('sqlite3:connect', uri, False, False, alias, **kw)
 
