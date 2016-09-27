@@ -4,6 +4,8 @@ import re
 
 try:
 	from mongoengine import connect, disconnect
+	from mongoengine.base import get_document
+	from mongoengine.errors import NotRegistered
 except ImportError:
 	raise ImportError('Unable to import mongoengine; pip install mongoengine to fix this.')
 
@@ -11,6 +13,42 @@ except ImportError:
 log = __import__('logging').getLogger(__name__)
 
 _safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
+
+
+
+class MongoEngineProxy(object):
+	"""Lazily load MongoEngine Document subclasses from its registry.
+	
+	Because MongoEngine supports the concept of multiple named connections, if you make multiple
+	`MongoEngineDBConnection` connections the same Document subclasses are made available across all-
+	the registry is common-but accessing via this proxy will bind to the specific connection being
+	dereferenced.
+	"""
+	
+	def __init__(self, connection):
+		self.connection = connection
+		self.database = connection.get_default_database()
+	
+	def __getattr__(self, name):
+		if name[0] == '_' or name.islower():
+			raise AttributeError()
+		
+		try:
+			return get_document(name)
+		except NotRegistered:
+			pass
+		
+		raise AttributeError()
+	
+	def __getitem__(self, name):
+		try:
+			return self.__getattr__(name)
+		except AttributeError:
+			pass
+		
+		raise KeyError()
+
+
 
 
 class MongoEngineDBConnection(object):
@@ -30,8 +68,8 @@ class MongoEngineDBConnection(object):
 		
 		kw['host'] = uri
 		
-		self._alias = alias
-		self._config = kw
+		self.alias = alias
+		self.config = kw
 	
 	def start(self, context):
 		"""Initialize the database connection."""
@@ -57,4 +95,6 @@ class MongoEngineDBConnection(object):
 		
 		disconnect(self.name)
 		del self.connection
+	
+
 
