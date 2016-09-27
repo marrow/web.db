@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from __future__ import print_function
-
 import os
 import sys
 import codecs
@@ -13,29 +11,13 @@ try:
 except ImportError:
 	from setuptools import setup, find_packages
 
-from setuptools.command.test import test as TestCommand
-
-
 if sys.version_info < (2, 7):
 	raise SystemExit("Python 2.7 or later is required.")
-elif sys.version_info > (3, 0) and sys.version_info < (3, 3):
-	raise SystemExit("Python 3.3 or later is required.")
+elif sys.version_info > (3, 0) and sys.version_info < (3, 2):
+	raise SystemExit("Python 3.2 or later is required.")
 
 version = description = url = author = author_email = ""  # Silence linter warnings.
 exec(open(os.path.join("web", "db", "release.py")).read())
-
-
-class PyTest(TestCommand):
-	def finalize_options(self):
-		TestCommand.finalize_options(self)
-		
-		self.test_args = []
-		self.test_suite = True
-	
-	def run_tests(self):
-		import pytest
-		sys.exit(pytest.main(self.test_args))
-
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -43,8 +25,7 @@ tests_require = [
 		'pytest',  # test collector and extensible runner
 		'pytest-cov',  # coverage reporting
 		'pytest-flakes',  # syntax validation
-		'pytest-cagoule',  # intelligent test execution
-		'pytest-spec',  # output formatting
+		'pytest-capturelog',  # log capture
 	]
 
 
@@ -87,10 +68,6 @@ setup(
 			'web.db',  # database adapter namespace
 			'web.ext',  # extension namespace
 		],
-	zip_safe = True,
-	cmdclass = dict(
-			test = PyTest,
-		),
 	
 	entry_points = {
 		'web.extension': [  # WebCore Framework Extensions
@@ -104,9 +81,12 @@ setup(
 			],
 		},
 	
+	setup_requires = [
+			'pytest-runner',
+		] if {'pytest', 'test', 'ptr'}.intersection(sys.argv) else [],
 	install_requires = [
 			'marrow.package<2.0',  # dynamic execution and plugin management
-			'WebOb',  # HTTP request and response objects, and HTTP status code exceptions
+			'WebCore>=2.0.3,<3.0',  # web framework dependency
 		],
 	tests_require = tests_require,
 	
