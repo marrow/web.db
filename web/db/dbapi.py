@@ -48,7 +48,7 @@ class _DBAPIConnection(object):
 					name = name,
 				))
 		
-		self.connection = context.db[name] = self._connect(self.uri, **self._config)
+		self.connection = context.db[name] = self._connector(self.uri, **self._config)
 	
 	def _disconnect(self, context):
 		"""Close the connection and clean up references."""
