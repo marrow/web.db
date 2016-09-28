@@ -30,7 +30,7 @@ class _DBAPIConnection(object):
 		
 		self._connector = load(engine, 'db_api_connect')
 		
-		if self.safe:
+		if self.safe:  # pragma: no cover
 			self.start = self._connect
 			self.stop = self._disconnect
 		else:
