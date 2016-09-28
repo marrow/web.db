@@ -15,7 +15,6 @@ class _DBAPIConnection(object):
 	
 	__slots__ = ('uri', 'safe', 'protect', 'alias', 'config')
 	
-	api = None  # Must be defined in subclasses.
 	uri_safety = True  # Go to some effort to hide connection passwords from logs.
 	thread_safe = True  # When False, create a connection for the duration of the request only.
 	
@@ -57,13 +56,13 @@ class _DBAPIConnection(object):
 		
 		if __debug__:
 			luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
-			log.info("Connecting " + self.api.partition(':')[0] + " database layer.", extra=dict(
+			log.info("Connecting " + self.engine.partition(':')[0] + " database layer.", extra=dict(
 					uri = luri,
 					config = self.config,
-					name = name,
+					alias = name,
 				))
 		
-		self.connection = context.db[name] = self._connector(self.uri, **self._config)
+		self.connection = context.db[name] = self._connector(self.uri, **self.config)
 	
 	def _disconnect(self, context):
 		"""Close the connection and clean up references."""
