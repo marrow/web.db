@@ -22,6 +22,9 @@ class CustomConnection(object):
 	
 	def done(self, context):
 		self.prepared = False
+	
+	def _private(self):
+		pass
 
 
 class TestDatabaseExtension(object):
@@ -78,4 +81,29 @@ class TestDatabaseExtension(object):
 		assert isinstance(ctx.db.default, CustomConnection)
 		assert ctx.db.default.running
 		assert ctx.db.default.prepared
+	
+	def test_lifecycle(self):
+		db = DatabaseExtension(CustomConnection())
+		ctx = Context()
+		
+		db.start(ctx)
+		assert isinstance(ctx.db.default, CustomConnection)
+		assert ctx.db.default.running
+		
+		db.prepare(ctx)
+		assert ctx.db.default.prepared
+		
+		db.done(ctx)
+		assert not ctx.db.default.prepared
+		
+		db.stop(ctx)
+		assert not ctx.db.default.running
+	
+	def test_missing_event_handler(self):
+		db = DatabaseExtension(CustomConnection())
+		assert not hasattr(db, 'after')
+	
+	def test_private_attribute(self):
+		db = DatabaseExtension(CustomConnection())
+		assert not hasattr(db, '_private')
 
