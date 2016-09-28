@@ -22,6 +22,7 @@ class _DBAPIConnection(object):
 	def __init__(self, engine, uri, safe=True, protect=True, alias=None, **kw):
 		"""Prepare configuration options."""
 		
+		self.engine = engine
 		self.uri = uri
 		self.safe = safe  # Thread safe? When False, create a connection for the duration of a request only.
 		self.protect = protect
@@ -37,11 +38,22 @@ class _DBAPIConnection(object):
 			self.prepare = self._connect
 			self.done = self._disconnect
 	
+	@property
+	def name(self):
+		return self.alias or getattr(self, '__name__', None)
+	
+	def __repr__(self):
+		luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
+		return '{self.__class__.__name__}({self.name}, "{self.engine}", "{uri}")'.format(
+				self = self,
+				uri = luri,
+			)
+	
 	def _connect(self, context):
 		"""Initialize the database connection."""
 		
 		# Only after passing to the DatabaseExtension intializer do we have a __name__...
-		name = self.name = self._alias or self.__name__
+		name = self.name
 		
 		if __debug__:
 			luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
@@ -61,6 +73,6 @@ class _DBAPIConnection(object):
 
 
 class SQLite3Connection(_DBAPIConnection):
-	def __init__(self, uri, alias=None, **kw):
-		super(SQLite3Connection, self).__init__('sqlite3:connect', uri, False, False, alias, **kw)
+	def __init__(self, path, alias=None, **kw):
+		super(SQLite3Connection, self).__init__('sqlite3:connect', path, False, False, alias, **kw)
 
