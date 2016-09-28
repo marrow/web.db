@@ -53,8 +53,6 @@ class MongoEngineProxy(object):
 		raise KeyError()
 
 
-
-
 class MongoEngineConnection(object):
 	"""WebCore DBExtension interface for projects utilizing MongoEngine.
 	
@@ -101,6 +99,4 @@ class MongoEngineConnection(object):
 		
 		disconnect(self.name)
 		del self.connection
-	
-
 
