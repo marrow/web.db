@@ -67,6 +67,8 @@ class DatabaseExtension(object):
 		for engine in self.engines.values():
 			if name in dir(engine):
 				return partial(self._handle_event, name)
+		
+		raise AttributeError()
 
 
 class DBExtension(DatabaseExtension):
