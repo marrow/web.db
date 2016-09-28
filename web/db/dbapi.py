@@ -10,7 +10,7 @@ log = __import__('logging').getLogger(__name__)
 _safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
 
 
-class _DBAPIConnection(object):
+class DBAPIConnection(object):
 	"""WebCore DBExtension interface for projects utilizing DB-API database engines."""
 	
 	__slots__ = ('uri', 'safe', 'protect', 'alias', 'config')
@@ -71,7 +71,7 @@ class _DBAPIConnection(object):
 		del self.connection
 
 
-class SQLite3Connection(_DBAPIConnection):
+class SQLite3Connection(DBAPIConnection):
 	def __init__(self, path, alias=None, **kw):
 		super(SQLite3Connection, self).__init__('sqlite3:connect', path, False, False, alias, **kw)
 
