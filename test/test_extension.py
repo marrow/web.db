@@ -9,12 +9,19 @@ from web.ext.db import DatabaseExtension, DBExtension
 class CustomConnection(object):
 	def __init__(self):
 		self.running = False
+		self.prepared = False
 	
 	def start(self, context):
 		self.running = True
 	
 	def stop(self, context):
 		self.running = False
+	
+	def prepare(self, context):
+		self.prepared = True
+	
+	def done(self, context):
+		self.prepared = False
 
 
 class TestDatabaseExtension(object):
@@ -60,4 +67,15 @@ class TestDatabaseExtension(object):
 		
 		assert isinstance(ctx.db.default, CustomConnection)
 		assert ctx.db.default.running
+	
+	def test_prepare(self):
+		db = DatabaseExtension(CustomConnection())
+		ctx = Context()
+		
+		db.start(ctx)
+		db.prepare(ctx)
+		
+		assert isinstance(ctx.db.default, CustomConnection)
+		assert ctx.db.default.running
+		assert ctx.db.default.prepared
 
