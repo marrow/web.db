@@ -27,12 +27,15 @@ class MongoEngineProxy(object):
 	"""
 	
 	def __init__(self, connection):
-		self.connection = connection
-		self.database = connection.get_default_database()
+		self._connection = connection
+		self._database = connection.get_default_database()
 	
 	def __getattr__(self, name):
-		if name[0] == '_' or name.islower():
+		if name[0] == '_':  # Protect against private attribute access.
 			raise AttributeError()
+		
+		if name[0].islower():  # Plain MongoDB connection behaviour, get that collection.
+			return getattr(self._database, name)
 		
 		try:
 			return get_document(name)
@@ -52,7 +55,7 @@ class MongoEngineProxy(object):
 
 
 
-class MongoEngineDBConnection(object):
+class MongoEngineConnection(object):
 	"""WebCore DBExtension interface for projects utilizing MongoEngine.
 	
 	URI-style connection strings should always be utilized. Provide a `replicaSet` query string argument to enable
@@ -76,20 +79,22 @@ class MongoEngineDBConnection(object):
 		"""Initialize the database connection."""
 		
 		# Only after passing to the DatabaseExtension intializer do we have a __name__...
-		name = self.name = self._alias or self.__name__
-		self._config['alias'] = name
+		name = self.name = self.alias or self.__name__
+		self.config['alias'] = name
+		safe_config = dict(self.config)
+		del safe_config['host']
 		
 		log.info("Connecting MongoEngine database layer.", extra=dict(
-				uri = _safe_uri_replace.sub(r'\1://\2@', self.uri),
-				config = self._config,
+				uri = _safe_uri_replace.sub(r'\1://\2@', self.config['host']),
+				config = self.config,
 			))
 		
-		self.connection = connect(**self._config)
+		self.connection = connect(**self.config)
 	
 	def prepare(self, context):
 		"""Attach this connection's default database to the context using our alias."""
 		
-		context.db[self.name] = self.connection.get_default_database()
+		context.db[self.name] = MongoEngineProxy(self.connection)
 	
 	def stop(self, context):
 		"""Close the connection pool and clean up references in MongoEngine."""
