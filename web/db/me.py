@@ -3,7 +3,8 @@
 import re
 
 try:
-	from mongoengine import connect, disconnect
+	from mongoengine import connect
+	from mongoengine.connection import disconnect
 	from mongoengine.base import get_document
 	from mongoengine.errors import NotRegistered
 except ImportError:
