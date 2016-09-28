@@ -21,9 +21,7 @@ class MongoEngineProxy(object):
 	"""Lazily load MongoEngine Document subclasses from its registry.
 	
 	Because MongoEngine supports the concept of multiple named connections, if you make multiple
-	`MongoEngineDBConnection` connections the same Document subclasses are made available across all-
-	the registry is common-but accessing via this proxy will bind to the specific connection being
-	dereferenced.
+	`MongoEngineDBConnection` connections the same Document subclasses are made available across all.
 	"""
 	
 	def __init__(self, connection):
