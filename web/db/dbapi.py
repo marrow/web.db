@@ -10,45 +10,59 @@ log = __import__('logging').getLogger(__name__)
 _safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
 
 
-class _DBAPIConnection(object):
+class DBAPIConnection(object):
 	"""WebCore DBExtension interface for projects utilizing DB-API database engines."""
 	
-	api = None  # Must be defined in subclasses.
+	__slots__ = ('uri', 'safe', 'protect', 'alias', 'config')
+	
 	uri_safety = True  # Go to some effort to hide connection passwords from logs.
 	thread_safe = True  # When False, create a connection for the duration of the request only.
 	
-	def __init__(self, uri, alias=None, **kw):
+	def __init__(self, engine, uri, safe=True, protect=True, alias=None, **kw):
 		"""Prepare configuration options."""
 		
+		self.engine = engine
 		self.uri = uri
-		self._alias = alias
-		self._config = kw
-		self._connector = load(self.api, 'db_api_connect')
+		self.safe = safe  # Thread safe? When False, create a connection for the duration of a request only.
+		self.protect = protect
+		self.alias = alias
+		self.config = kw
 		
-		if __debug__ and not self.api:
-			raise NotImplementedError("Use subclasses of _DBAPIConnection, not the class itself.")
+		self._connector = load(engine, 'db_api_connect')
 		
-		if self.thread_safe:
+		if self.safe:  # pragma: no cover
 			self.start = self._connect
 			self.stop = self._disconnect
 		else:
 			self.prepare = self._connect
 			self.done = self._disconnect
 	
+	@property
+	def name(self):
+		return self.alias or getattr(self, '__name__', None)
+	
+	def __repr__(self):
+		luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
+		return '{self.__class__.__name__}({self.name}, "{self.engine}", "{uri}")'.format(
+				self = self,
+				uri = luri,
+			)
+	
 	def _connect(self, context):
 		"""Initialize the database connection."""
 		
 		# Only after passing to the DatabaseExtension intializer do we have a __name__...
-		name = self.name = self._alias or self.__name__
+		name = self.name
 		
-		if self.thread_safe or __debug__:
-			log.info("Connecting " + self.api.partition(':')[0] + " database layer.", extra=dict(
-					uri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if self.uri_safety else self.uri,
-					config = self._config,
-					name = name,
+		if __debug__:
+			luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
+			log.info("Connecting " + self.engine.partition(':')[0] + " database layer.", extra=dict(
+					uri = luri,
+					config = self.config,
+					alias = name,
 				))
 		
-		self.connection = context.db[name] = self._connector(self.uri, **self._config)
+		self.connection = context.db[name] = self._connector(self.uri, **self.config)
 	
 	def _disconnect(self, context):
 		"""Close the connection and clean up references."""
@@ -57,8 +71,7 @@ class _DBAPIConnection(object):
 		del self.connection
 
 
-class SQLite3Connection(_DBAPIConnection):
-	api = 'sqlite3:connect'
-	uri_safety = False
-	thread_safe = False
+class SQLite3Connection(DBAPIConnection):
+	def __init__(self, path, alias=None, **kw):
+		super(SQLite3Connection, self).__init__('sqlite3:connect', path, False, False, alias, **kw)
 

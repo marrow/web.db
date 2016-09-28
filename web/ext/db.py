@@ -13,8 +13,11 @@ class DatabaseExtension(object):
 	
 	_provides = {'db'}
 	
-	def __init__(self, **engines):
+	def __init__(self, default=None, **engines):
 		"""Configure the database management extension."""
+		
+		if default is not None:
+			engines['default'] = default
 		
 		self.engines = engines
 		
@@ -64,6 +67,8 @@ class DatabaseExtension(object):
 		for engine in self.engines.values():
 			if name in dir(engine):
 				return partial(self._handle_event, name)
+		
+		raise AttributeError()
 
 
 class DBExtension(DatabaseExtension):
