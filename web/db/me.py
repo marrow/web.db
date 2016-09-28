@@ -7,7 +7,7 @@ try:
 	from mongoengine.connection import disconnect
 	from mongoengine.base import get_document
 	from mongoengine.errors import NotRegistered
-except ImportError:
+except ImportError:  # pragma: no cover
 	raise ImportError('Unable to import mongoengine; pip install mongoengine to fix this.')
 
 
