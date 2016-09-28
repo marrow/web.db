@@ -9,7 +9,7 @@ except ImportError:
 log = __import__('logging').getLogger(__name__)
 
 
-class SQLAlchemyDBConnection(object):
+class SQLAlchemyConnection(object):
 	"""WebCore DBExtension interface for sqlalchemy based projects.
 	
 	Creates a connection at startup then adds a sqlalchemy session to the WebCore context on each request, for seamless
