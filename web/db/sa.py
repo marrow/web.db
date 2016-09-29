@@ -1,78 +1,81 @@
 # encoding: utf-8
 
+import re
+
 try:
-	from sqlalchemy import create_engine, orm, MetaData
+	from sqlalchemy import create_engine
+	from sqlalchemy.orm import scoped_session, sessionmaker
 except ImportError:
 	raise ImportError('Unable to import sqlalchemy; pip install sqlalchemy to fix this.')
 
 
 log = __import__('logging').getLogger(__name__)
 
+_safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
+
 
 class SQLAlchemyConnection(object):
-	"""WebCore DBExtension interface for sqlalchemy based projects.
+	"""SQLAlchemy database engine support for WebCore's DatabaseExtension."""
 	
-	Creates a connection at startup then adds a sqlalchemy session to the WebCore context on each request, for seamless
-	ORM and relational DB support.
-	"""
+	__slots__ = ('name', 'uri', 'alias', 'config', 'engine', 'Session')
 	
-	__slots__ = ('uri', 'engine', 'config', 'alias', 'metadata', 'session', 'session_opts')
-	
-	def __init__(self, uri, session=None, metadata=None, session_opts=None, alias=None, **kw):
-		if session is not None and not isinstance(session, orm.scoping.ScopedSession):
-			raise TypeError('The "session" option needs to be a reference to a ScopedSession instance')
+	def __init__(self, uri, alias=None, **config):
+		"""Prepare SQLAlchemy configuration."""
+		# def __init__(self, uri, session=None, metadata=None, session_opts=None, alias=None, **kw):
 		
-		if metadata is not None and not isinstance(metadata, MetaData):
-			raise TypeError('The "metadata" option needs to be a reference to a MetaData instance')
+		config.setdefault('pool_recycle', 3600)
 		
 		self.uri = uri
-		self.engine = create_engine(uri, **kw)
-		self.config = kw
 		self.alias = alias
-		self.metadata = metadata
-		self.session = session
-		self.session_opts = session_opts or {}
+		self.config = config
+		self.engine = None
+		self.Session = None
+	
+	def __repr__(self):
+		luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
+		return '{self.__class__.__name__}({self.name}, "{self.engine}", "{uri}")'.format(
+				self = self,
+				uri = luri,
+			)
 	
 	def start(self, context):
-		"""Setup database connection and Session base class"""
+		"""Construct the SQLAlchemy engine and session factory."""
 		
-		name = self.name = self._alias or self.__name__
+		name = self.name = self.alias or self.__name__
 		
-		# TODO: More diagnostic information.
-		log.info("Connecting SQLAlchemy engine.", extra=dict(name=name, config=self._config))
-		self._engine.connect().close()
+		if __debug__:
+			luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
+			log.info("Connecting SQLAlchemy database layer.", extra=dict(
+					uri = luri,
+					config = self.config,
+					alias = name,
+				))
 		
-		if self._session is None:
-			self._session = orm.scoped_session(orm.sessionmaker(**self._session_opts))
+		# Construct the engine.
+		engine = self.engine = create_engine(self.uri, **self.config)
 		
-		self._session.configure(bind=self._engine)
+		# Construct the session factory.
+		self.Session = scoped_session(sessionmaker(bind=engine))
 		
-		if self._metadata is not None:
-			self._metadata.bind = self._engine
+		# Test the connection.
+		engine.connect().close()
 		
-		if self._config.get('connect', True):
-			pass  # Log extra details about the connection here.
-		
-		# context.db[name] = engine if engine is not None
+		# Assign the engine to our database alias.
+		context.db[name] = engine
 	
 	def prepare(self, context):
 		"""Prepare a sqlalchemy session on the WebCore context"""
 		
-		context.db[self.name] = self._session()
+		# Assign the session factory to our database alias.
+		context.db[self.name] = self.Session
 	
 	def done(self, context):
-		"""Commit the session transaction for the request."""
+		"""Close and clean up the request local session, if any."""
 		
-		# TODO: TransactionExtension support.
-		
-		try:
-			if context.db[self.name].is_active:
-				if context.response.status_int < 500:
-					context.db[self.name].commit()
-				else:
-					context.db[self.name].rollback()
-		finally:
-			context.db[self.name].close()  # Not sure about this. -- Alice
+		context.db[self.name].remove()
 	
 	def stop(self, context):
-		self._engine.dispose()
+		"""Disconnect any hanging connections in the pool."""
+		
+		self.engine.dispose()
+
