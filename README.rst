@@ -39,8 +39,8 @@ Installing ``web.db`` is easy, just execute the following in a terminal::
 
 **Note:** We *strongly* recommend always using a container, virtualization, or sandboxing environment of some kind when
 developing using Python; installing things system-wide is yucky (for a variety of reasons) nine times out of ten.  We
-prefer light-weight `virtualenv <https://virtualenv.pypa.io/en/latest/virtualenv.html>`_, others prefer solutions as
-robust as `Vagrant <http://www.vagrantup.com>`_.
+prefer light-weight `virtualenv <https://virtualenv.pypa.io/en/latest/virtualenv.html>`__, others prefer solutions as
+robust as `Vagrant <http://www.vagrantup.com>`__.
 
 If you add ``web.db`` to the ``install_requires`` argument of the call to ``setup()`` in your
 application's ``setup.py`` file, this extension will be automatically installed and made available when your own
@@ -62,11 +62,11 @@ Development Version
 
     |developstatus| |developcover| |ghsince| |issuecount| |ghfork|
 
-Development takes place on `GitHub <https://github.com/>`_ in the 
-`web.db <https://github.com/marrow/web.db/>`_ project.  Issue tracking, documentation, and
+Development takes place on `GitHub <https://github.com/>`__ in the 
+`web.db <https://github.com/marrow/web.db/>`__ project.  Issue tracking, documentation, and
 downloads are provided there.
 
-Installing the current development version requires `Git <http://git-scm.com/>`_, a distributed source code management
+Installing the current development version requires `Git <http://git-scm.com/>`__, a distributed source code management
 system.  If you have Git you can run the following to download and *link* the development version into your Python
 runtime::
 
@@ -79,7 +79,7 @@ You can then upgrade to the latest version at any time::
 
 If you would like to make changes and contribute them back to the project, fork the GitHub project, make your changes,
 and submit a pull request.  This process is beyond the scope of this documentation; for more information see
-`GitHub's documentation <http://help.github.com/>`_.
+`GitHub's documentation <http://help.github.com/>`__.
 
 
 Usage
