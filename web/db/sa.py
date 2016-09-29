@@ -26,14 +26,14 @@ class SQLAlchemyConnection(object):
 		config.setdefault('pool_recycle', 3600)
 		
 		self.uri = uri
-		self.alias = alias
+		self.name = self.alias = alias
 		self.config = config
 		self.engine = None
 		self.Session = None
 	
 	def __repr__(self):
 		luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
-		return '{self.__class__.__name__}({self.name}, "{self.engine}", "{uri}")'.format(
+		return '{self.__class__.__name__}({self.name}, "{uri}")'.format(
 				self = self,
 				uri = luri,
 			)

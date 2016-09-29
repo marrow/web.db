@@ -51,6 +51,10 @@ class TestSQLAlchemy(object):
 	def test_lifecycle(self, sa):
 		pass
 	
+	def test_repr(self):
+		sa = SQLAlchemyConnection('sqlite://', 'test')
+		assert repr(sa) == 'SQLAlchemyConnection(test, "sqlite://")'
+	
 	def test_use(self, sa):
 		engine, session = sa
 		
