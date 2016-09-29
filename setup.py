@@ -27,6 +27,7 @@ tests_require = [
 		'pytest-flakes',  # syntax validation
 		'pytest-capturelog',  # log capture
 		'mongoengine',  # database connector
+		'sqlalchemy',  # database connector
 	]
 
 
