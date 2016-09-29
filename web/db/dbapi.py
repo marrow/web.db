@@ -1,17 +1,15 @@
 # encoding: utf-8
 
-import re
-
 from marrow.package.loader import load
+
+from .util import redact_uri
 
 
 log = __import__('logging').getLogger(__name__)
 
-_safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
-
 
 class DBAPIConnection(object):
-	"""WebCore DBExtension interface for projects utilizing DB-API database engines."""
+	"""WebCore DBExtension interface for projects utilizing PEP 249 DB API database engines."""
 	
 	__slots__ = ('uri', 'safe', 'protect', 'alias', 'config')
 	
@@ -37,32 +35,23 @@ class DBAPIConnection(object):
 			self.prepare = self._connect
 			self.done = self._disconnect
 	
-	@property
-	def name(self):
-		return self.alias or getattr(self, '__name__', None)
-	
 	def __repr__(self):
-		luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
-		return '{self.__class__.__name__}({self.name}, "{self.engine}", "{uri}")'.format(
+		return '{self.__class__.__name__}({self.alias}, "{self.engine}", "{uri}")'.format(
 				self = self,
-				uri = luri,
+				uri = redact_uri(self.uri, self.protect),
 			)
 	
 	def _connect(self, context):
 		"""Initialize the database connection."""
 		
-		# Only after passing to the DatabaseExtension intializer do we have a __name__...
-		name = self.name
-		
 		if __debug__:
-			luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
 			log.info("Connecting " + self.engine.partition(':')[0] + " database layer.", extra=dict(
-					uri = luri,
+					uri = redact_uri(self.uri, self.protect),
 					config = self.config,
-					alias = name,
+					alias = self.alias,
 				))
 		
-		self.connection = context.db[name] = self._connector(self.uri, **self.config)
+		self.connection = context.db[self.alias] = self._connector(self.uri, **self.config)
 	
 	def _disconnect(self, context):
 		"""Close the connection and clean up references."""
