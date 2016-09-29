@@ -74,9 +74,7 @@ class MongoEngineConnection(object):
 	def start(self, context):
 		"""Initialize the database connection."""
 		
-		# Only after passing to the DatabaseExtension intializer do we have a __name__...
-		name = self.name = self.alias or self.__name__
-		self.config['alias'] = name
+		self.config['alias'] = self.alias
 		safe_config = dict(self.config)
 		del safe_config['host']
 		
@@ -90,11 +88,11 @@ class MongoEngineConnection(object):
 	def prepare(self, context):
 		"""Attach this connection's default database to the context using our alias."""
 		
-		context.db[self.name] = MongoEngineProxy(self.connection)
+		context.db[self.alias] = MongoEngineProxy(self.connection)
 	
 	def stop(self, context):
 		"""Close the connection pool and clean up references in MongoEngine."""
 		
-		disconnect(self.name)
+		disconnect(self.alias)
 		del self.connection
 

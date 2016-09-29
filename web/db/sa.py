@@ -17,7 +17,7 @@ _safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
 class SQLAlchemyConnection(object):
 	"""SQLAlchemy database engine support for WebCore's DatabaseExtension."""
 	
-	__slots__ = ('name', 'uri', 'alias', 'config', 'engine', 'Session')
+	__slots__ = ('uri', 'alias', 'config', 'engine', 'Session')
 	
 	def __init__(self, uri, alias=None, **config):
 		"""Prepare SQLAlchemy configuration."""
@@ -26,14 +26,14 @@ class SQLAlchemyConnection(object):
 		config.setdefault('pool_recycle', 3600)
 		
 		self.uri = uri
-		self.name = self.alias = alias
+		self.alias = alias
 		self.config = config
 		self.engine = None
 		self.Session = None
 	
 	def __repr__(self):
 		luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
-		return '{self.__class__.__name__}({self.name}, "{uri}")'.format(
+		return '{self.__class__.__name__}({self.alias}, "{uri}")'.format(
 				self = self,
 				uri = luri,
 			)
@@ -41,14 +41,12 @@ class SQLAlchemyConnection(object):
 	def start(self, context):
 		"""Construct the SQLAlchemy engine and session factory."""
 		
-		name = self.name = self.alias or self.__name__
-		
 		if __debug__:
 			luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
 			log.info("Connecting SQLAlchemy database layer.", extra=dict(
 					uri = luri,
 					config = self.config,
-					alias = name,
+					alias = self.alias,
 				))
 		
 		# Construct the engine.
@@ -61,18 +59,18 @@ class SQLAlchemyConnection(object):
 		engine.connect().close()
 		
 		# Assign the engine to our database alias.
-		context.db[name] = engine
+		context.db[self.alias] = engine
 	
 	def prepare(self, context):
 		"""Prepare a sqlalchemy session on the WebCore context"""
 		
 		# Assign the session factory to our database alias.
-		context.db[self.name] = self.Session
+		context.db[self.alias] = self.Session
 	
 	def done(self, context):
 		"""Close and clean up the request local session, if any."""
 		
-		context.db[self.name].remove()
+		context.db[self.alias].remove()
 	
 	def stop(self, context):
 		"""Disconnect any hanging connections in the pool."""
