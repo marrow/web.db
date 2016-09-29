@@ -5,7 +5,7 @@ import re
 try:
 	from sqlalchemy import create_engine
 	from sqlalchemy.orm import scoped_session, sessionmaker
-except ImportError:
+except ImportError:  # pragma: no cover
 	raise ImportError('Unable to import sqlalchemy; pip install sqlalchemy to fix this.')
 
 
