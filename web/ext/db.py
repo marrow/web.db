@@ -26,7 +26,7 @@ class DatabaseExtension(object):
 		self.provides = set(self._provides)
 		
 		for name, engine in engines.items():
-			if not getattr(engine.alias, None):
+			if not getattr(engine, 'alias', None):
 				engine.alias = name  # Inform the engine what its name is.
 			
 			# Update our own uses, needs, and provides flags with those provided by our hosted plugins.

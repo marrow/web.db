@@ -1,17 +1,15 @@
 # encoding: utf-8
 
-import re
-
 try:
 	from sqlalchemy import create_engine
 	from sqlalchemy.orm import scoped_session, sessionmaker
 except ImportError:  # pragma: no cover
 	raise ImportError('Unable to import sqlalchemy; pip install sqlalchemy to fix this.')
 
+from .util import redact_uri
+
 
 log = __import__('logging').getLogger(__name__)
-
-_safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
 
 
 class SQLAlchemyConnection(object):
@@ -32,19 +30,17 @@ class SQLAlchemyConnection(object):
 		self.Session = None
 	
 	def __repr__(self):
-		luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
 		return '{self.__class__.__name__}({self.alias}, "{uri}")'.format(
 				self = self,
-				uri = luri,
+				uri = redact_uri(self.uri),
 			)
 	
 	def start(self, context):
 		"""Construct the SQLAlchemy engine and session factory."""
 		
 		if __debug__:
-			luri = _safe_uri_replace.sub(r'\1://\2@', self.uri) if '@' in self.uri and self.protect else self.uri
 			log.info("Connecting SQLAlchemy database layer.", extra=dict(
-					uri = luri,
+					uri = redact_uri(self.uri),
 					config = self.config,
 					alias = self.alias,
 				))

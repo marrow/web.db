@@ -33,7 +33,6 @@ class Address(Base):
 def sa():
 	ctx = Context(db=Context())
 	sa = SQLAlchemyConnection('sqlite://', 'test')
-	sa.name = 'test'
 	
 	sa.start(ctx)
 	engine = ctx.db.test

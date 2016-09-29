@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-import re
-
 try:
 	from mongoengine import connect
 	from mongoengine.connection import disconnect
@@ -10,11 +8,10 @@ try:
 except ImportError:  # pragma: no cover
 	raise ImportError('Unable to import mongoengine; pip install mongoengine to fix this.')
 
+from .util import redact_uri
+
 
 log = __import__('logging').getLogger(__name__)
-
-_safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
-
 
 
 class MongoEngineProxy(object):
@@ -79,7 +76,7 @@ class MongoEngineConnection(object):
 		del safe_config['host']
 		
 		log.info("Connecting MongoEngine database layer.", extra=dict(
-				uri = _safe_uri_replace.sub(r'\1://\2@', self.config['host']),
+				uri = redact_uri(self.config['host']),
 				config = self.config,
 			))
 		
