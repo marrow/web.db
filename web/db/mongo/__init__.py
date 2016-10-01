@@ -65,7 +65,7 @@ class MongoDBConnection(object):
 		client = self.client = MongoClient(self.uri, **self.config)
 		
 		if self.minimum:
-			version = tuple(client.server_info()['version'].split('.'))
+			version = tuple(int(i) for i in client.server_info()['version'].split('.'))
 			if version < self.minimum:
 				raise RuntimeError("Unsupported MongoDB server version: " + ".".join(version))
 		
