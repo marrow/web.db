@@ -26,8 +26,6 @@ class MongoDBConnection(object):
 	this extension adapts 
 	"""
 	
-	__slots__ = ('__name__', 'uri', 'config', 'client', 'db', 'alias', 'minimum')
-	
 	provides = {'mongodb'}
 	
 	def __init__(self, uri, alias=None, minimum_version=None, **config):

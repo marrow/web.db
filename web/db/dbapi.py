@@ -11,8 +11,6 @@ log = __import__('logging').getLogger(__name__)
 class DBAPIConnection(object):
 	"""WebCore DBExtension interface for projects utilizing PEP 249 DB API database engines."""
 	
-	__slots__ = ('uri', 'safe', 'protect', 'alias', 'config')
-	
 	uri_safety = True  # Go to some effort to hide connection passwords from logs.
 	thread_safe = True  # When False, create a connection for the duration of the request only.
 	
