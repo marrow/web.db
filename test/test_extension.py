@@ -48,7 +48,6 @@ class TestDatabaseExtension(object):
 	
 	def test_construction_engine_updates(self):
 		class Connection(object):
-			__slots__ = ('alias', )
 			uses = {'i-use-this'}
 			needs = {'i-need-this'}
 			provides = {'i-provide-this'}

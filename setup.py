@@ -26,6 +26,7 @@ tests_require = [
 		'pytest-cov',  # coverage reporting
 		'pytest-flakes',  # syntax validation
 		'pytest-capturelog',  # log capture
+		'pymongo',  # database connector
 		'mongoengine',  # database connector
 		'sqlalchemy',  # database connector
 	]
@@ -78,6 +79,7 @@ setup(
 		
 		'web.db': [  # Database Connectors
 				'sqlalchemy = web.db.sa:SQLAlchemyDBConnection',
+				'pymongo = web.db.mongo:MongoDBConnection',
 				'mongoengine = web.db.me:MongoEngineDBConnection',
 				'dbapi = web.db.dbapi:DBAPIConnection',
 				'sqlite3 = web.db.dbapi:SQLite3Connection',

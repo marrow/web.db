@@ -9,8 +9,6 @@ from ..core.context import ContextGroup
 
 
 class DatabaseExtension(object):
-	__slots__ = ('engines', 'uses', 'needs', 'provides')
-	
 	_provides = {'db'}
 	
 	def __init__(self, default=None, **engines):
