@@ -15,8 +15,6 @@ log = __import__('logging').getLogger(__name__)
 class SQLAlchemyConnection(object):
 	"""SQLAlchemy database engine support for WebCore's DatabaseExtension."""
 	
-	__slots__ = ('uri', 'alias', 'config', 'engine', 'Session')
-	
 	def __init__(self, uri, alias=None, **config):
 		"""Prepare SQLAlchemy configuration."""
 		# def __init__(self, uri, session=None, metadata=None, session_opts=None, alias=None, **kw):
