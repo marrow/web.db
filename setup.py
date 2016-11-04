@@ -26,6 +26,7 @@ tests_require = [
 		'pytest-cov',  # coverage reporting
 		'pytest-flakes',  # syntax validation
 		'pytest-capturelog',  # log capture
+		'pymongo',  # database connector
 		'mongoengine',  # database connector
 		'sqlalchemy',  # database connector
 	]
