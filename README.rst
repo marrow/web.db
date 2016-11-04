@@ -196,6 +196,14 @@ provide examples.
 Version History
 ===============
 
+Version 2.0.1
+-------------
+
+* Updated the ``README`` and metaproject layout to current Marrow standards.
+* Removed extraneous imports and slots where unhelpful or causing issues, such as in the SQLAlchemy adapter. (Thanks
+  bmillham!)
+* Migrated ``MongoDBConnection`` from `marrow.mongo <https://github.com/marrow/mongo>`__.
+
 Version 2.0
 -----------
 
@@ -271,12 +279,12 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
     :target: https://github.com/marrow/web.db/issues
     :alt: Github Issues
 
-.. |ghsince| image:: https://img.shields.io/github/commits-since/marrow/web.db/2.0.0.svg
+.. |ghsince| image:: https://img.shields.io/github/commits-since/marrow/web.db/2.0.1.svg
     :target: https://github.com/marrow/web.db/commits/develop
     :alt: Changes since last release.
 
 .. |ghtag| image:: https://img.shields.io/github/tag/marrow/web.db.svg
-    :target: https://github.com/marrow/web.db/tree/2.0.0
+    :target: https://github.com/marrow/web.db/tree/2.0.1
     :alt: Latest Github tagged release.
 
 .. |latestversion| image:: http://img.shields.io/pypi/v/web.db.svg?style=flat
