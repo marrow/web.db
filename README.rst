@@ -162,6 +162,30 @@ and "disconnected" on application shutdown. Otherwise the interface is "connecte
 "disconnected" at the end of the request, after all content has been returned to the user.
 
 
+MongoDB
+-------
+
+An adapter is provided for plain MongoDB connections, as provided by the
+`pymongo <https://pypi.python.org/pypi/pymongo>`__ package. Extended capabilities are provided beyond a typical
+``MongoClient`` connection, and the database with its collection attributes are exposed via the ``context.db``
+attribute.
+
+To get started, you need a URL to connect to, and need to construct a ``MongoDBConnection`` instance to pass to
+the ``DatabaseExtension`` during application configuration::
+
+    from web.ext.db import DatabaseExtesion
+    from web.db.mongo import MongoDBConnection
+    
+    app = Application("Hi.", extensions=[
+            DatabaseExtension(MongoDBConnection('mongodb://localhost/test'))
+        ])
+
+With a confguration like this, attributes of ``context.db`` will represent pymongo ``Collection`` instances.
+
+
+
+
+
 SQLAlchemy
 ----------
 
