@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 try:
 	from sqlalchemy import create_engine
 	from sqlalchemy.orm import scoped_session, sessionmaker
@@ -12,7 +10,7 @@ from .util import redact_uri
 log = __import__('logging').getLogger(__name__)
 
 
-class SQLAlchemyConnection(object):
+class SQLAlchemyConnection:
 	"""SQLAlchemy database engine support for WebCore's DatabaseExtension."""
 	
 	def __init__(self, uri, alias=None, **config):
@@ -70,4 +68,3 @@ class SQLAlchemyConnection(object):
 		"""Disconnect any hanging connections in the pool."""
 		
 		self.engine.dispose()
-

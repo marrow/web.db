@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 """MongoDB GridFS file serving support."""
 
 if __debug__:
@@ -36,4 +34,3 @@ def render_grid_file(context, f):
 		response.app_iter = iter(f)  # Assign the body as a streaming, chunked iterator.
 	
 	return True
-

@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 """MongoDB database connection extension."""
 
 import re
@@ -18,7 +16,7 @@ log = __import__('logging').getLogger(__name__)
 _safe_uri_replace = re.compile(r'(\w+)://(\w+):(?P<password>[^@]+)@')
 
 
-class MongoDBConnection(object):
+class MongoDBConnection:
 	"""WebCore database extension connector for MongoDB databases.
 	
 	This tiny class performs the work needed to populate the WebCore context with a MonogoDB database (or connection
@@ -83,4 +81,3 @@ class MongoDBConnection(object):
 	def stop(self, context):
 		self.client.close()
 		del context.db[self.alias or self.__name__]
-

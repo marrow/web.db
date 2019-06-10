@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 try:
 	from mongoengine import connect
 	from mongoengine.connection import disconnect
@@ -14,7 +12,7 @@ from .util import redact_uri
 log = __import__('logging').getLogger(__name__)
 
 
-class MongoEngineProxy(object):
+class MongoEngineProxy:
 	"""Lazily load MongoEngine Document subclasses from its registry.
 	
 	Because MongoEngine supports the concept of multiple named connections, if you make multiple
@@ -48,7 +46,7 @@ class MongoEngineProxy(object):
 		raise KeyError()
 
 
-class MongoEngineConnection(object):
+class MongoEngineConnection:
 	"""WebCore DBExtension interface for projects utilizing MongoEngine.
 	
 	URI-style connection strings should always be utilized. Provide a `replicaSet` query string argument to enable
@@ -92,4 +90,3 @@ class MongoEngineConnection(object):
 		
 		disconnect(self.alias)
 		del self.connection
-

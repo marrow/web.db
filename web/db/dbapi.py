@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 from marrow.package.loader import load
 
 from .util import redact_uri
@@ -8,7 +6,7 @@ from .util import redact_uri
 log = __import__('logging').getLogger(__name__)
 
 
-class DBAPIConnection(object):
+class DBAPIConnection:
 	"""WebCore DBExtension interface for projects utilizing PEP 249 DB API database engines."""
 	
 	uri_safety = True  # Go to some effort to hide connection passwords from logs.
@@ -60,5 +58,4 @@ class DBAPIConnection(object):
 
 class SQLite3Connection(DBAPIConnection):
 	def __init__(self, path, alias=None, **kw):
-		super(SQLite3Connection, self).__init__('sqlite3:connect', path, False, False, alias, **kw)
-
+		super().__init__('sqlite3:connect', path, False, False, alias, **kw)

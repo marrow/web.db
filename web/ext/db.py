@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 """Database connection handling extension."""
 
 from weakref import proxy
@@ -8,7 +6,7 @@ from functools import partial
 from ..core.context import ContextGroup
 
 
-class DatabaseExtension(object):
+class DatabaseExtension:
 	_provides = {'db'}
 	
 	def __init__(self, default=None, **engines):
@@ -32,7 +30,7 @@ class DatabaseExtension(object):
 			self.needs.update(getattr(engine, 'needs', ()))
 			self.provides.update(getattr(engine, 'provides', ()))
 		
-		super(DatabaseExtension, self).__init__()
+		super().__init__()
 	
 	def start(self, context):
 		# Construct the primary ContextGroup containing our engines.
@@ -72,8 +70,7 @@ class DatabaseExtension(object):
 
 class DBExtension(DatabaseExtension):
 	def __init__(self, *args, **kw):
-		super(DBExtension, self).__init__(*args, **kw)
+		super().__init__(*args, **kw)
 		
 		from warnings import warn
 		warn('DBExtension is deprecated, use DatabaseExtension instead.', DeprecationWarning)
-
