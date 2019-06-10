@@ -1,15 +1,8 @@
-#!/usr/bin/env python
-# encoding: utf-8
+#!/usr/bin/env python3
 
 from setuptools import setup
 from sys import argv, version_info as python_version
 from pathlib import Path
-
-
-try:
-	from setuptools.core import setup, find_packages
-except ImportError:
-	from setuptools import setup, find_packages
 
 if python_version < (3, 6):
 	raise SystemExit("Python 3.6 or later is required.")
