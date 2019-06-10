@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import os
-import sys
-import codecs
+from setuptools import setup
+from sys import argv, version_info as python_version
+from pathlib import Path
 
 
 try:
@@ -11,21 +11,17 @@ try:
 except ImportError:
 	from setuptools import setup, find_packages
 
-if sys.version_info < (2, 7):
-	raise SystemExit("Python 2.7 or later is required.")
-elif sys.version_info > (3, 0) and sys.version_info < (3, 2):
-	raise SystemExit("Python 3.2 or later is required.")
+if python_version < (3, 6):
+	raise SystemExit("Python 3.6 or later is required.")
 
-version = description = url = author = author_email = ""  # Silence linter warnings.
-exec(open(os.path.join("web", "db", "release.py")).read())
-
-here = os.path.abspath(os.path.dirname(__file__))
+here = Path(__file__).resolve().parent
+version = description = url = author = author_email = ""  # Populated by the next line.
+exec((here / "web" / "db" / "release.py").read_text('utf-8'))
 
 tests_require = [
 		'pytest',  # test collector and extensible runner
 		'pytest-cov',  # coverage reporting
 		'pytest-flakes',  # syntax validation
-		'pytest-capturelog',  # log capture
 		'pymongo',  # database connector
 		'mongoengine',  # database connector
 		'sqlalchemy',  # database connector
@@ -35,14 +31,22 @@ tests_require = [
 setup(
 	name = "web.db",
 	version = version,
+	
 	description = description,
-	long_description = codecs.open(os.path.join(here, 'README.rst'), 'r', 'utf8').read(),
+	long_description = (here / 'README.rst').read_text('utf-8'),
 	url = url,
 	download_url = 'https://github.com/marrow/web.db/releases',
+	
 	author = author.name,
 	author_email = author.email,
 	license = 'MIT',
-	keywords = ['marrow', 'web.ext', 'web.db'],
+	keywords = [
+			'marrow',
+			'web.ext',
+			'web.db',
+			'WebCore',
+			'database connector',
+		],
 	classifiers = [
 			"Development Status :: 5 - Production/Stable",
 			"Environment :: Console",
@@ -51,26 +55,42 @@ setup(
 			"License :: OSI Approved :: MIT License",
 			"Operating System :: OS Independent",
 			"Programming Language :: Python",
-			"Programming Language :: Python :: 2",
-			"Programming Language :: Python :: 2.7",
 			"Programming Language :: Python :: 3",
-			"Programming Language :: Python :: 3.2",
-			"Programming Language :: Python :: 3.3",
-			"Programming Language :: Python :: 3.4",
-			"Programming Language :: Python :: 3.5",
+			"Programming Language :: Python :: 3.6",
+			"Programming Language :: Python :: 3.7",
+			"Programming Language :: Python :: 3.8",
 			"Programming Language :: Python :: Implementation :: CPython",
 			"Programming Language :: Python :: Implementation :: PyPy",
 			"Topic :: Software Development :: Libraries",
 			"Topic :: Software Development :: Libraries :: Python Modules",
 		],
 	
-	packages = find_packages(exclude=['bench', 'doc', 'example', 'test']),
+	project_urls = {
+			"Repository": "https://github.com/marrow/web.db/",
+			"Documentation": "https://github.com/marrow/web.db/#readme",
+			"Issue Tracker": "https://github.com/marrow/web.db/issues",
+			"Funding": "https://www.patreon.com/GothAlice",
+		},
+	
+	packages = ('web.db', 'web.ext'),
 	include_package_data = True,
-	namespace_packages = [
-			'web',  # primary namespace
-			'web.db',  # database adapter namespace
-			'web.ext',  # extension namespace
+	package_data = {'': ['README.rst', 'LICENSE.txt']},
+	zip_safe = False,
+	
+	setup_requires = [
+			'pytest-runner',
+		] if {'pytest', 'test', 'ptr'}.intersection(argv) else [],
+	
+	install_requires = [
+			'marrow.package~=2.0.0',  # dynamic execution and plugin management
+			'WebCore~=3.0.0',  # web framework dependency
 		],
+	
+	extras_require = dict(
+			development = tests_require + ['pre-commit'],  # Development-time dependencies.
+		),
+	
+	tests_require = tests_require,
 	
 	entry_points = {
 		'web.extension': [  # WebCore Framework Extensions
@@ -85,17 +105,4 @@ setup(
 				'sqlite3 = web.db.dbapi:SQLite3Connection',
 			],
 		},
-	
-	setup_requires = [
-			'pytest-runner',
-		] if {'pytest', 'test', 'ptr'}.intersection(sys.argv) else [],
-	install_requires = [
-			'marrow.package<2.0',  # dynamic execution and plugin management
-			'WebCore>=2.0.3,<3.0',  # web framework dependency
-		],
-	tests_require = tests_require,
-	
-	extras_require = dict(
-			development = tests_require,
-		),
 )
