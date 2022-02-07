@@ -76,7 +76,7 @@ setup(
 	
 	install_requires = [
 			'marrow.package~=2.0.0',  # dynamic execution and plugin management
-			'WebCore~=3.0.0',  # web framework dependency
+			'WebCore>2.0.0',  # web framework dependency
 		],
 	
 	extras_require = dict(
