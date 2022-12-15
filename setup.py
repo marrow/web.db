@@ -75,7 +75,7 @@ setup(
 		] if {'pytest', 'test', 'ptr'}.intersection(argv) else [],
 	
 	install_requires = [
-			'marrow.package~=2.0.0',  # dynamic execution and plugin management
+			'marrow.package>=2.0.0',  # dynamic execution and plugin management
 			'WebCore>2.0.0',  # web framework dependency
 		],
 	
