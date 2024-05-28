@@ -65,7 +65,7 @@ setup(
 			"Funding": "https://www.patreon.com/GothAlice",
 		},
 	
-	packages = ('web.db', 'web.ext'),
+	packages = ('web.db', 'web.db.mongo', 'web.ext'),
 	include_package_data = True,
 	package_data = {'': ['README.rst', 'LICENSE.txt']},
 	zip_safe = False,
